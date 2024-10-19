@@ -59,6 +59,10 @@ class DelayModel:
             if col not in data.columns:
                 data[col] = 0
 
+        # **Filter the columns to match the expected features from the test**
+        if hasattr(self, 'FEATURES_COLS'):
+            data = data[self.FEATURES_COLS]  # Select only the expected columns
+
         # Check if the target column exists
         if target_column:
             if target_column not in data.columns:
@@ -68,6 +72,7 @@ class DelayModel:
             return features, target
 
         return data
+
 
 
 
