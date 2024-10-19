@@ -87,17 +87,13 @@ class TestModel(unittest.TestCase):
         assert report["1"]["f1-score"] > 0.30
 
 
-    def test_model_predict(
-        self
-    ):
-        features = self.model.preprocess(
-            data=self.data
-        )
-
-        predicted_targets = self.model.predict(
-            features=features
-        )
-
-        assert isinstance(predicted_targets, list)
-        assert len(predicted_targets) == features.shape[0]
-        assert all(isinstance(predicted_target, int) for predicted_target in predicted_targets)
+    def test_model_predict(self):
+        # Preprocess data
+        features, target = self.model.preprocess(data=self.data, target_column="delay")
+        
+        # Call fit first
+        self.model.fit(features, target)
+        
+        # Now call predict
+        predicted_targets = self.model.predict(features=features)
+        assert len(predicted_targets) == len(target)

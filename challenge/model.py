@@ -11,7 +11,7 @@ class DelayModel:
     def preprocess(self, data: pd.DataFrame, target_column: str = None):
         # Replace underscores with hyphens in column names
         data.columns = data.columns.str.replace('_', '-')
-        
+
         # Convert date columns to datetime
         data['Fecha-I'] = pd.to_datetime(data['Fecha-I'])
         data['Fecha-O'] = pd.to_datetime(data['Fecha-O'])
@@ -42,24 +42,29 @@ class DelayModel:
         choices = ['morning', 'afternoon', 'night']
         data['period_day'] = pd.Categorical(np.select(conditions, choices, default='night'))
 
-        # Drop unnecessary columns, ignore errors if they don't exist
+        # Drop unnecessary columns
         columns_to_drop = ['Fecha-I', 'Fecha-O', 'Vlo-I', 'Vlo-O', 'Ori-I', 'Des-I', 'Emp-I', 'Emp-O', 'hour', 'AÑO', 'DIA', 'MES']
         data = data.drop(columns=[col for col in columns_to_drop if col in data.columns], errors='ignore')
 
-        # One-hot encoding for categorical columns (like 'period_day')
+        # One-hot encoding for categorical columns
         data = pd.get_dummies(data, drop_first=True)
 
-        # Ensure that all the expected columns are present
+        # Ensure all expected columns are present
         expected_columns = ['period_day_morning', 'period_day_afternoon', 'min_diff', 'high_season']
         for col in expected_columns:
             if col not in data.columns:
                 data[col] = 0
 
+        # Check if the target column exists
         if target_column:
+            if target_column not in data.columns:
+                raise KeyError(f"Target column '{target_column}' not found in data")
             target = data[target_column]
             features = data.drop(columns=[target_column])
             return features, target
+
         return data
+
 
     def fit(self, features: pd.DataFrame, target: pd.DataFrame) -> None:
         # Initialize a simple Logistic Regression model
