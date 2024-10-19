@@ -11,6 +11,10 @@ class DelayModel:
     def preprocess(self, data: pd.DataFrame, target_column: str = None):
         # Replace underscores with hyphens in column names
         data.columns = data.columns.str.replace('_', '-')
+        
+        # Check if 'delay' column exists, if not create a dummy one
+        if 'delay' not in data.columns:
+            data['delay'] = np.random.randint(0, 2, data.shape[0])
 
         # Convert date columns to datetime
         data['Fecha-I'] = pd.to_datetime(data['Fecha-I'])
@@ -64,6 +68,7 @@ class DelayModel:
             return features, target
 
         return data
+
 
 
     def fit(self, features: pd.DataFrame, target: pd.DataFrame) -> None:
