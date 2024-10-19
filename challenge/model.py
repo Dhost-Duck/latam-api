@@ -11,7 +11,7 @@ class DelayModel:
     def preprocess(self, data: pd.DataFrame, target_column: str = None):
         # Convert date columns to datetime
         data['Fecha-I'] = pd.to_datetime(data['Fecha-I'])
-        data['Fecha_O'] = pd.to_datetime(data['Fecha_O'])
+        data['Fecha-O'] = pd.to_datetime(data['Fecha-O'])
 
         # Create 'min_diff' as the difference in minutes between 'Fecha_O' and 'Fecha_I'
         data['min_diff'] = (data['Fecha_O'] - data['Fecha_I']).dt.total_seconds() / 60
