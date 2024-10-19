@@ -9,28 +9,31 @@ class DelayModel:
         self._model = None
 
     def preprocess(self, data: pd.DataFrame, target_column: str = None):
+        # Replace underscores with hyphens in column names
+        data.columns = data.columns.str.replace('_', '-')
+        
         # Convert date columns to datetime
         data['Fecha-I'] = pd.to_datetime(data['Fecha-I'])
         data['Fecha-O'] = pd.to_datetime(data['Fecha-O'])
 
-        # Create 'min_diff' as the difference in minutes between 'Fecha_O' and 'Fecha_I'
-        data['min_diff'] = (data['Fecha_O'] - data['Fecha_I']).dt.total_seconds() / 60
+        # Create 'min_diff' as the difference in minutes between 'Fecha-O' and 'Fecha-I'
+        data['min_diff'] = (data['Fecha-O'] - data['Fecha-I']).dt.total_seconds() / 60
 
         # Create 'high_season' column
         high_season_dates = (
-            ((data['Fecha_I'].dt.month == 12) & (data['Fecha_I'].dt.day >= 15)) |
-            (data['Fecha_I'].dt.month == 1) |
-            (data['Fecha_I'].dt.month == 2) |
-            ((data['Fecha_I'].dt.month == 3) & (data['Fecha_I'].dt.day <= 3)) |
-            ((data['Fecha_I'].dt.month == 7) & (data['Fecha_I'].dt.day >= 15)) |
-            (data['Fecha_I'].dt.month == 7) |
-            ((data['Fecha_I'].dt.month == 9) & (data['Fecha_I'].dt.day >= 11)) |
-            (data['Fecha_I'].dt.month == 9)
+            ((data['Fecha-I'].dt.month == 12) & (data['Fecha-I'].dt.day >= 15)) |
+            (data['Fecha-I'].dt.month == 1) |
+            (data['Fecha-I'].dt.month == 2) |
+            ((data['Fecha-I'].dt.month == 3) & (data['Fecha-I'].dt.day <= 3)) |
+            ((data['Fecha-I'].dt.month == 7) & (data['Fecha-I'].dt.day >= 15)) |
+            (data['Fecha-I'].dt.month == 7) |
+            ((data['Fecha-I'].dt.month == 9) & (data['Fecha-I'].dt.day >= 11)) |
+            (data['Fecha-I'].dt.month == 9)
         )
         data['high_season'] = high_season_dates.astype(int)
 
-        # Create 'period_day' column based on 'Fecha_I'
-        data['hour'] = data['Fecha_I'].dt.hour
+        # Create 'period_day' column based on 'Fecha-I'
+        data['hour'] = data['Fecha-I'].dt.hour
         conditions = [
             (data['hour'] >= 5) & (data['hour'] < 12),
             (data['hour'] >= 12) & (data['hour'] < 19),
@@ -40,7 +43,7 @@ class DelayModel:
         data['period_day'] = pd.Categorical(np.select(conditions, choices, default='night'))
 
         # Drop unnecessary columns, ignore errors if they don't exist
-        columns_to_drop = ['Fecha_I', 'Fecha_O', 'Vlo_I', 'Vlo_O', 'Ori_I', 'Des_I', 'Emp_I', 'Emp_O', 'hour', 'AÑO', 'DIA', 'MES']
+        columns_to_drop = ['Fecha-I', 'Fecha-O', 'Vlo-I', 'Vlo-O', 'Ori-I', 'Des-I', 'Emp-I', 'Emp-O', 'hour', 'AÑO', 'DIA', 'MES']
         data = data.drop(columns=[col for col in columns_to_drop if col in data.columns], errors='ignore')
 
         # One-hot encoding for categorical columns (like 'period_day')
@@ -57,9 +60,6 @@ class DelayModel:
             features = data.drop(columns=[target_column])
             return features, target
         return data
-
-
-
 
     def fit(self, features: pd.DataFrame, target: pd.DataFrame) -> None:
         # Initialize a simple Logistic Regression model
