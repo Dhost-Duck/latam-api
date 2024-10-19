@@ -9,10 +9,8 @@ class DelayModel:
         self._model = None
 
     def preprocess(self, data: pd.DataFrame, target_column: str = None):
-
-        data.columns = data.columns.str.replace('_', '-')
         # Convert date columns to datetime
-        data['Fecha_I'] = pd.to_datetime(data['Fecha_I'])
+        data['Fecha-I'] = pd.to_datetime(data['Fecha-I'])
         data['Fecha_O'] = pd.to_datetime(data['Fecha_O'])
 
         # Create 'min_diff' as the difference in minutes between 'Fecha_O' and 'Fecha_I'
